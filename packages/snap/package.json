@@ -1,11 +1,10 @@
 {
-  "name": "snap",
-  "version": "0.1.0",
-  "private": true,
-  "description": "The 'Hello, world!' of MetaMask Snaps, now written in TypeScript.",
+  "name": "rugproof-snap",
+  "version": "0.1.1",
+  "description": "Become RugProof",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
+    "url": "https://github.com/therealharpaljadeja/rugproof-snap.git"
   },
   "license": "(MIT-0 OR Apache-2.0)",
   "main": "src/index.ts",
@@ -25,6 +24,13 @@
     "lint:misc": "prettier '**/*.json' '**/*.md' '!CHANGELOG.md' --ignore-path .gitignore",
     "serve": "mm-snap serve",
     "start": "mm-snap watch"
+  },
+  "dependencies": {
+    "@ethersproject/units": "^5.7.0",
+    "@metamask/abi-utils": "^1.1.1",
+    "alchemy-sdk": "^2.5.0",
+    "eth-rpc-errors": "^4.0.3",
+    "ethers": "^6.0.8"
   },
   "devDependencies": {
     "@lavamoat/allow-scripts": "^2.0.3",

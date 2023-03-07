@@ -1,33 +1,90 @@
-import { OnRpcRequestHandler } from '@metamask/snaps-types';
-import { panel, text } from '@metamask/snaps-ui';
+import {
+  OnRpcRequestHandler,
+  OnTransactionHandler,
+} from '@metamask/snaps-types';
+import {
+  copyable,
+  divider,
+  heading,
+  panel,
+  spinner,
+  text,
+} from '@metamask/snaps-ui';
+import { Network } from 'alchemy-sdk';
+import { alchemy } from './lib/alchemy';
+import {
+  interpretResult,
+  isUserInteractingWithContractFirstTime,
+} from './lib/interpretation';
+import { formatUnits } from '@ethersproject/units';
 
-/**
- * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
- *
- * @param args - The request handler args as object.
- * @param args.origin - The origin of the request, e.g., the website that
- * invoked the snap.
- * @param args.request - A validated JSON-RPC request object.
- * @returns The result of `snap_dialog`.
- * @throws If the request method is not valid for this snap.
- */
-export const onRpcRequest: OnRpcRequestHandler = ({ origin, request }) => {
-  switch (request.method) {
-    case 'hello':
-      return snap.request({
-        method: 'snap_dialog',
-        params: {
-          type: 'Confirmation',
-          content: panel([
-            text(`Hello, **${origin}**!`),
-            text('This custom confirmation is just for display purposes.'),
-            text(
-              'But you can edit the snap source code to make it do something, if you want to!',
-            ),
-          ]),
-        },
-      });
-    default:
-      throw new Error('Method not found.');
+const simulate = async (transaction): Promise<any> => {
+  let insights = {};
+  try {
+    let receipt = await alchemy
+      .forNetwork(Network.ETH_GOERLI)
+      .transact.simulateExecution(transaction);
+    console.log(receipt);
+
+    let interpretationResult = await interpretResult(receipt);
+    // let isFirstInteraction = await isUserInteractingWithContractFirstTime(
+    //   transaction,
+    // );
+
+    insights = { interpretationResult };
+
+    return insights;
+  } catch (e) {
+    return { insights: { error: e } };
+  }
+};
+
+export const onTransaction: OnTransactionHandler = async ({
+  transaction,
+  chainId,
+  transactionOrigin,
+}) => {
+  let start = Date.now();
+  const insights = await simulate(transaction);
+  if (insights.interpretationResult) {
+    const { interpretationResult } = insights;
+    const erc20s = interpretationResult.tokenTransfers.erc20Transfers.map(
+      ({ value, decimals, symbol, from: tokenFrom, to }) => {
+        return panel([
+          text(`Transferring ${formatUnits(value, decimals)} ${symbol}`),
+          text(`**From:** ${tokenFrom}`),
+          text(`**To:** ${to}`),
+          tokenFrom == '0x0' &&
+            text(`Minting ${formatUnits(value, decimals)} ${symbol} tokens.`),
+        ]);
+      },
+    );
+    const erc721s = interpretationResult.tokenTransfers.erc721Transfers.map(
+      ({ from: tokenFrom, to, tokenId, name }) =>
+        panel([
+          text(`Transferring ${name} (${tokenId})`),
+          text(`**From:** ${tokenFrom}`),
+          text(`**To:** ${to}`),
+          tokenFrom == '0x0' &&
+            text(`Minting token id ${tokenId} of ${name} Collection.`),
+        ]),
+    );
+    console.log((Date.now() - start) / 1000);
+    return {
+      content: panel([
+        // isFirstInteraction && text('🟡 You are interacting with this contract for the first time! 🟡'),
+        // divider(),
+        ...(erc20s.length > 0
+          ? [text('**ERC20 transfers**'), ...erc20s, divider()]
+          : []),
+        ...(erc721s.length > 0
+          ? [text('**ERC721 transfers**'), ...erc721s, divider()]
+          : []),
+      ]),
+    };
+  } else {
+    return {
+      content: panel([text('Execution failed')]),
+    };
   }
 };

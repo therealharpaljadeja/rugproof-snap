@@ -16,7 +16,7 @@ export type MetamaskState = {
 };
 
 const initialState: MetamaskState = {
-  isFlask: false,
+  isFlask: true,
   error: undefined,
 };
 

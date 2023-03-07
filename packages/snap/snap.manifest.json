@@ -1,13 +1,13 @@
 {
   "version": "0.1.0",
-  "description": "An example Snap written in TypeScript.",
-  "proposedName": "TypeScript Example Snap",
+  "description": "RugProof Snap gives you insights about the transaction you are about to perform",
+  "proposedName": "RugProof Snap",
   "repository": {
     "type": "git",
     "url": "https://github.com/MetaMask/template-snap-monorepo.git"
   },
   "source": {
-    "shasum": "IgmLa9j7q8fAStRzmp9l/r1to0jAA9TxWRQjf3ghA+Y=",
+    "shasum": "9xenVi3mC6Lc4x4ht7RKSnbYc1iUORc72LGgPmqI3gk=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -19,6 +19,8 @@
   },
   "initialPermissions": {
     "snap_dialog": {},
+    "endowment:transaction-insight": {},
+    "endowment:network-access": {},
     "endowment:rpc": {
       "dapps": true,
       "snaps": false

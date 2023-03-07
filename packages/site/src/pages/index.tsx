@@ -135,6 +135,10 @@ const Index = () => {
 
   const handleMintToken = async () => {
     try {
+      let [from] = (await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      })) as string[];
+
       let networkVersion = await window.ethereum.request({
         method: 'net_version',
       });
@@ -162,6 +166,10 @@ const Index = () => {
 
   const handleMintNFT = async () => {
     try {
+      let [from] = (await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      })) as string[];
+
       let networkVersion = await window.ethereum.request({
         method: 'net_version',
       });
@@ -189,6 +197,10 @@ const Index = () => {
 
   const handleClaimTokenAirdrop = async () => {
     try {
+      let [from] = (await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      })) as string[];
+
       let networkVersion = await window.ethereum.request({
         method: 'net_version',
       });
@@ -218,6 +230,10 @@ const Index = () => {
 
   const handleClaimNFTAirdrop = async () => {
     try {
+      let [from] = (await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      })) as string[];
+
       let networkVersion = await window.ethereum.request({
         method: 'net_version',
       });

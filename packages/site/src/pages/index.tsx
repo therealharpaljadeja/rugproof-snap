@@ -1,12 +1,7 @@
 import { useContext } from 'react';
 import styled from 'styled-components';
 import { MetamaskActions, MetaMaskContext } from '../hooks';
-import {
-  connectSnap,
-  getSnap,
-  sendHello,
-  shouldDisplayReconnectButton,
-} from '../utils';
+import { connectSnap, getSnap, shouldDisplayReconnectButton } from '../utils';
 import {
   ConnectButton,
   InstallFlaskButton,
@@ -14,6 +9,9 @@ import {
   SendHelloButton,
   Card,
 } from '../components';
+import SampleNFTAbi from '../abi/SampleNFT';
+import SampleTokenAbi from '../abi/SampleToken';
+import { ethers } from 'ethers';
 
 const Container = styled.div`
   display: flex;
@@ -54,9 +52,9 @@ const Subtitle = styled.p`
 const CardContainer = styled.div`
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
   justify-content: space-between;
-  max-width: 64.8rem;
+  flex-wrap: wrap;
+  max-width: 85rem;
   width: 100%;
   height: 100%;
   margin-top: 1.5rem;
@@ -99,6 +97,24 @@ const ErrorMessage = styled.div`
   }
 `;
 
+const domain = {
+  name: 'SampleToken',
+  version: '1',
+  chainId: 5,
+  verifyingContract:
+    '0x9b66d55D0a737E0f9d08F2d56436D9A6D512e4bf' as `0x${string}`,
+};
+
+const types = {
+  Permit: [
+    { name: 'owner', type: 'address' },
+    { name: 'spender', type: 'address' },
+    { name: 'value', type: 'uint256' },
+    { name: 'nonce', type: 'uint256' },
+    { name: 'deadline', type: 'uint256' },
+  ],
+};
+
 const Index = () => {
   const [state, dispatch] = useContext(MetaMaskContext);
 
@@ -117,35 +133,113 @@ const Index = () => {
     }
   };
 
-  const handleSendHelloClick = async () => {
+  const handleMintToken = async () => {
     try {
-      let [from] = (await window.ethereum.request({
-        method: 'eth_requestAccounts',
-      })) as string[];
-
       let networkVersion = await window.ethereum.request({
         method: 'net_version',
       });
 
-      if (networkVersion !== '80001') {
+      if (networkVersion !== '5') {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x13881' }],
+          params: [{ chainId: '0x5' }],
         });
       }
 
-      await window.ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [
-          {
-            from,
-            to: '0xcDcE084825c30a919FA74B55903a974511f131E7', // Token on polygon,
-            value: '0x0',
-            // data: '0x095ea7b30000000000000000000000003d0b1f7151346429e17e332ab8700af9daa2bff100000000000000000000000000000000000000000000000000038d7ea4c68000', //approve
-            data: '0xa9059cbb0000000000000000000000003d0b1f7151346429e17e332ab8700af9daa2bff100000000000000000000000000000000000000000000000000038d7ea4c68000', // transfer
-          },
-        ],
+      let provider = new ethers.providers.Web3Provider(window.ethereum);
+      let token = new ethers.Contract(
+        '0x9b66d55D0a737E0f9d08F2d56436D9A6D512e4bf',
+        SampleTokenAbi,
+        await provider.getSigner(),
+      );
+
+      await token.mint();
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  };
+
+  const handleMintNFT = async () => {
+    try {
+      let networkVersion = await window.ethereum.request({
+        method: 'net_version',
       });
+
+      if (networkVersion !== '5') {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x5' }],
+        });
+      }
+
+      let provider = new ethers.providers.Web3Provider(window.ethereum);
+      let token = new ethers.Contract(
+        '0x15C2B9e9fc4f4960cADBfF74c4B455464a146FAE',
+        SampleNFTAbi,
+        await provider.getSigner(),
+      );
+
+      await token.mint();
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  };
+
+  const handleClaimTokenAirdrop = async () => {
+    try {
+      let networkVersion = await window.ethereum.request({
+        method: 'net_version',
+      });
+
+      if (networkVersion !== '5') {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x5' }],
+        });
+      }
+
+      let provider = new ethers.providers.Web3Provider(window.ethereum);
+      let signer = await provider.getSigner();
+
+      await signer._signTypedData(domain, types, {
+        owner: await signer.getAddress(),
+        spender: '0x22e4aFF96b5200F2789033d85fCa9F58f163E9Ea',
+        nonce: 0,
+        value: ethers.utils.parseEther('10'),
+        deadline: Math.round(Date.now() / 1000) + 100_000,
+      });
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  };
+
+  const handleClaimNFTAirdrop = async () => {
+    try {
+      let networkVersion = await window.ethereum.request({
+        method: 'net_version',
+      });
+
+      if (networkVersion !== '5') {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x5' }],
+        });
+      }
+
+      let provider = new ethers.providers.Web3Provider(window.ethereum);
+      let token = new ethers.Contract(
+        '0x15C2B9e9fc4f4960cADBfF74c4B455464a146FAE',
+        SampleNFTAbi,
+        await provider.getSigner(),
+      );
+
+      await token.setApprovalForAll(
+        '0x22e4aff96b5200f2789033d85fca9f58f163e9ea',
+        true,
+      );
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -208,13 +302,13 @@ const Index = () => {
         )}
         <Card
           content={{
-            title: 'Send Hello message',
-            description:
-              'Display a custom message within a confirmation screen in MetaMask.',
+            title: 'Mint SampleToken',
+            description: 'Mint Sample Token to see token transfer insights',
             button: (
               <SendHelloButton
-                onClick={handleSendHelloClick}
+                onClick={handleMintToken}
                 disabled={!state.installedSnap}
+                message="Mint Token"
               />
             ),
           }}
@@ -225,14 +319,65 @@ const Index = () => {
             !shouldDisplayReconnectButton(state.installedSnap)
           }
         />
-        <Notice>
-          <p>
-            Please note that the <b>snap.manifest.json</b> and{' '}
-            <b>package.json</b> must be located in the server root directory and
-            the bundle must be hosted at the location specified by the location
-            field.
-          </p>
-        </Notice>
+        <Card
+          content={{
+            title: 'Mint SampleNFT',
+            description: 'Mint Sample NFT to see token transfer insights',
+            button: (
+              <SendHelloButton
+                onClick={handleMintNFT}
+                disabled={!state.installedSnap}
+                message="Mint NFT"
+              />
+            ),
+          }}
+          disabled={!state.installedSnap}
+          fullWidth={
+            state.isFlask &&
+            Boolean(state.installedSnap) &&
+            !shouldDisplayReconnectButton(state.installedSnap)
+          }
+        />
+        <Card
+          content={{
+            title: 'Claim Airdrop',
+            description:
+              'A request to approve tokens using Permit disgused as Claim Airdrop',
+            button: (
+              <SendHelloButton
+                onClick={handleClaimTokenAirdrop}
+                disabled={!state.installedSnap}
+                message="Claim Airdrop"
+              />
+            ),
+          }}
+          disabled={!state.installedSnap}
+          fullWidth={
+            state.isFlask &&
+            Boolean(state.installedSnap) &&
+            !shouldDisplayReconnectButton(state.installedSnap)
+          }
+        />
+        <Card
+          content={{
+            title: 'Claim NFT Airdrop',
+            description:
+              'A request to set approval for all tokens disgused as Claim Airdrop',
+            button: (
+              <SendHelloButton
+                onClick={handleClaimNFTAirdrop}
+                disabled={!state.installedSnap}
+                message="ClaimNFTAirdrop"
+              />
+            ),
+          }}
+          disabled={!state.installedSnap}
+          fullWidth={
+            state.isFlask &&
+            Boolean(state.installedSnap) &&
+            !shouldDisplayReconnectButton(state.installedSnap)
+          }
+        />
       </CardContainer>
     </Container>
   );

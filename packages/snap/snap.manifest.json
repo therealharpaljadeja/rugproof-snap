@@ -1,10 +1,10 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "RugProof Snap gives you insights about the transaction you are about to perform",
   "proposedName": "RugProof Snap",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
+    "url": "https://github.com/therealharpaljadeja/rugproof-snap.git"
   },
   "source": {
     "shasum": "9xenVi3mC6Lc4x4ht7RKSnbYc1iUORc72LGgPmqI3gk=",
@@ -12,7 +12,7 @@
       "npm": {
         "filePath": "dist/bundle.js",
         "iconPath": "images/icon.svg",
-        "packageName": "snap",
+        "packageName": "rugproof-snap",
         "registry": "https://registry.npmjs.org/"
       }
     }

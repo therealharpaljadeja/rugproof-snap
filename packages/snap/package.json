@@ -29,6 +29,8 @@
     "@ethersproject/units": "^5.7.0",
     "@metamask/abi-utils": "^1.1.1",
     "alchemy-sdk": "^2.5.0",
+    "dotenv": "^16.0.3",
+    "envify": "^4.1.0",
     "eth-rpc-errors": "^4.0.3"
   },
   "devDependencies": {

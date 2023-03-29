@@ -12,9 +12,11 @@ type CardProps = {
 };
 
 const CardWrapper = styled.div<{ fullWidth?: boolean; disabled: boolean }>`
+  ${({ fullWidth }) => {
+    return fullWidth ? `grid-column: 1 / 2 span;` : ``;
+  }}
   display: flex;
   flex-direction: column;
-  width: '100%';
   background-color: ${({ theme }) => theme.colors.card.default};
   margin-top: 2.4rem;
   margin-bottom: 2.4rem;

@@ -1,5 +1,4 @@
 import { Alchemy, AlchemySettings, Network } from 'alchemy-sdk';
-
 /**
  * This is a wrapper around the Alchemy class that allows you to use the same
  * Alchemy object to make requests to multiple networks using different
@@ -67,7 +66,7 @@ export class AlchemyMultichainClient {
 export type AlchemyMultichainSettings = Omit<AlchemySettings, 'network'>;
 
 const defaultConfig = {
-  apiKey: 'hv_uZ6Xk6hgIHFe6gf7TJDjqCSgJNgy5',
+  apiKey: process.env.ALCHEMY_API_KEY,
   network: Network.ETH_GOERLI,
 };
 

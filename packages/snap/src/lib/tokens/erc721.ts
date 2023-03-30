@@ -1,19 +1,18 @@
 import { decodeSingle } from '@metamask/abi-utils';
-import dotenv from 'dotenv';
-dotenv.config();
 
 const getContractMetadata = async (address: string) => {
   let response = await fetch(
-    `https://api.nftport.xyz/v0/nfts/${address}?chain=goerli&page_number=1&page_size=50&include=metadata&refresh_metadata=false`,
+    `https://deep-index.moralis.io/api/v2/nft/${address}/metadata?chain=goerli`,
     {
       headers: {
-        Authorization: '327421dc-7d0d-4533-9476-041b36c95f94',
+        'X-API-Key':
+          'jbMr8QqBgNvipNjN8Qn5Ovty6gXcSp01kFFyTNThmER42Cuz8SxBTa0rafDQLOUf',
       },
     },
   );
-  let { contract } = await response.json();
-  let { name, symbol, type } = contract;
-  return { name, symbol, type };
+
+  let { name, symbol, contract_type } = await response.json();
+  return { name, symbol, contract_type };
 };
 
 // const decodeSingleNFT = async (
@@ -55,14 +54,16 @@ export const decodeERC721Transfers = async (logs) => {
           const from = log.topics[1];
           const to = log.topics[2];
           const tokenId = decodeSingle('uint256', log.topics[3]).toString(10);
-          let { name, symbol, type } = await getContractMetadata(log.address);
+          let { name, symbol, contract_type } = await getContractMetadata(
+            log.address,
+          );
           return {
             from,
             to,
             tokenId,
             symbol,
             name,
-            type,
+            contract_type,
           };
         }),
     );

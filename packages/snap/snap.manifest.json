@@ -1,5 +1,5 @@
 {
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "RugProof Snap gives you insights about the transaction you are about to perform",
   "proposedName": "RugProof Snap",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "https://github.com/therealharpaljadeja/rugproof-snap.git"
   },
   "source": {
-    "shasum": "kmw94VBymHOCh2nSkhJHXgCwWTgZASuKFcHPTIJzYfs=",
+    "shasum": "BnAWPVX4bqriTRfzWXO1FjDnogNUHcnI3VaIY89phQE=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

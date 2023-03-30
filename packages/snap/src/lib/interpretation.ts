@@ -8,7 +8,12 @@ export const interpretResult = async (receipt: any) => {
 
 async function getTxList(address: string) {
   let response = await fetch(
-    `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=10&sort=asc&apikey=${process.env.ETHERSCAN_API_KEY}`,
+    `https://deep-index.moralis.io/api/v2/${address}?chain=goerli`,
+    {
+      headers: {
+        'X-API-Key': process.env.MORALIS_API_KEY as string,
+      },
+    },
   );
   let { result } = await response.json();
   return result;
@@ -17,10 +22,7 @@ async function getTxList(address: string) {
 export const isUserInteractingWithContractFirstTime = async (
   transaction: any,
 ) => {
-  let response = await fetch(
-    `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${transaction.from}&apikey=${process.env.ETHERSCAN_API_KEY}`,
-  );
-  let { result } = await response.json();
+  let result = await getTxList(transaction.from);
   let filtered = result.filter((tx) => tx.to === transaction.to);
   return !filtered.length;
 };
@@ -30,10 +32,14 @@ const hasContractDeployerInteractedWithTornado = async (address: string) => {
     `https://api-goerli.etherscan.io/api?module=contract&action=getcontractcreation&contractaddresses=${address}&apikey=${process.env.ETHERSCAN_API_KEY}`,
   );
   let { result } = await response.json();
+
   let deployer = result[0].contractCreator;
+
   let deployerTxs = await getTxList(deployer);
   let txs = deployerTxs.filter(
-    (tx) => tx.to === '0xd90e2f925DA726b50C4Ed8D0Fb90Ad053324F31b',
+    (tx) =>
+      tx.receipt_contract_address ===
+      '0xedcc67ce2776011be7a8525505223330a982fd68',
   );
 
   return txs.length;
@@ -48,17 +54,15 @@ const getContractABI = async (address: string) => {
 };
 
 export async function toInsights(transaction: any) {
-  let response = await fetch(
-    `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${transaction.to}&apikey=${process.env.ETHERSCAN_API_KEY}`,
-  );
-  let { result } = await response.json();
   let isDeployerTornadoUser = await hasContractDeployerInteractedWithTornado(
     transaction.to,
   );
 
+  let result = await getTxList(transaction.to);
+
   const contractAge = Math.round(
-    Math.round(Date.now() / 1000 - Number(result[0].timeStamp)) /
-      (24 * 60 * 60),
+    Math.round(Date.now() - new Date(result[0].block_timestamp).valueOf()) /
+      (24 * 60 * 60 * 1000),
   );
 
   let contractABI = await getContractABI(transaction.to);

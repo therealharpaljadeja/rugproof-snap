@@ -11,6 +11,7 @@ module.exports = {
       envify({
         ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
         ETHERSCAN_API_KEY: process.env.ETHERSCAN_API_KEY,
+        MORALIS_API_KEY: process.env.MORALIS_API_KEY,
       }),
     );
   },

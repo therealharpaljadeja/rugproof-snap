@@ -15,7 +15,6 @@ const getTokenMetadata = async (address: string) => {
 
   const result = await response.json();
   const { name, symbol, decimals } = result[0];
-  console.log(name, symbol, decimals);
 
   return { symbol, decimals, name };
 };

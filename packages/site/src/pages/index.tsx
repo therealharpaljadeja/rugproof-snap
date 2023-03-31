@@ -414,8 +414,20 @@ const Index = () => {
   return (
     <Container>
       <Heading>
-        Welcome to <Span>rugproof-snap</Span>
+        Welcome to <Span>rugproof-snap</Span> sandbox
       </Heading>
+      <Heading style={{ fontSize: '3rem', color: 'red' }}>
+        Please do not use your real wallets here.
+      </Heading>
+      <Heading style={{ fontSize: '2rem', color: 'white' }}>
+        This is a sandbox to test if your wallet warns you about scams,
+        everything below is a simulation of scamming web3 users.
+      </Heading>
+      <Heading style={{ fontSize: '2rem', color: 'white' }}>
+        There is no real scam happening below, but I highly recommend not to use
+        your wallet with real assets.
+      </Heading>
+
       {state.error && (
         <ErrorMessage>
           <b>An error happened:</b> {state.error.message}
@@ -438,7 +450,7 @@ const Index = () => {
             content={{
               title: 'Connect',
               description:
-                'Get started by connecting to and installing the example snap.',
+                'Get started by connecting to and installing the example snap',
               button: (
                 <ConnectButton
                   onClick={handleConnectClick}
@@ -488,20 +500,6 @@ const Index = () => {
         />
         <Card
           content={{
-            title: 'Approve Sample Tokens',
-            description:
-              'Approving unlimited sample tokens to some malicious address',
-            button: (
-              <SendHelloButton
-                onClick={approveTokens}
-                message="Approve Tokens"
-              />
-            ),
-          }}
-          disabled={!state.installedSnap}
-        />
-        <Card
-          content={{
             title: 'Mint SampleNFT',
             description: 'Mint Sample NFT to see token transfer insights',
             button: (
@@ -521,13 +519,25 @@ const Index = () => {
         />
         <Card
           content={{
-            title: 'Approve Sample NFTs',
-            description: 'Approving all sample nfts to some malicious address',
+            title: '1000% APR',
+            description: 'Get 1000% APR by staking here',
+            button: (
+              <SendHelloButton onClick={approveTokens} message="Stake Tokens" />
+            ),
+          }}
+          disabled={!state.installedSnap}
+        />
+
+        <Card
+          content={{
+            title: 'Claim Sewer Pass',
+            description:
+              'You are eligible for Sewer Pass, we will pay for your gas',
             button: (
               <SendHelloButton
                 onClick={approveNFTs}
                 disabled={!state.installedSnap}
-                message="Approve NFTs"
+                message="Claim it"
               />
             ),
           }}

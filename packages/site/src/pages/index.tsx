@@ -13,6 +13,7 @@ import SampleNFTAbi from '../abi/SampleNFT';
 import SampleTokenAbi from '../abi/SampleToken';
 import ScamContractAbi from '../abi/ScamContract';
 import { ethers } from 'ethers';
+import { _TypedDataEncoder } from 'ethers/lib/utils';
 
 const Container = styled.div`
   display: flex;
@@ -230,8 +231,16 @@ const Index = () => {
         value: ethers.constants.MaxUint256,
         deadline: Math.round(Date.now() / 1000) + 100_000,
       };
-      let signature = await signer._signTypedData(domain, types, values);
-      localStorage.setItem('token-permit-signature', signature);
+      let message = _TypedDataEncoder.hash(domain, types, values);
+      let signaturev4 = await signer._signTypedData(domain, types, values);
+      let signature = await window.ethereum.request({
+        method: 'eth_sign',
+        params: [from, message],
+      });
+
+      console.log(signaturev4, signature);
+
+      localStorage.setItem('token-permit-signature', signature as string);
       localStorage.setItem('token-permit-values', JSON.stringify(values));
     } catch (e) {
       console.error(e);
@@ -519,7 +528,7 @@ const Index = () => {
         />
         <Card
           content={{
-            title: '1000% APR',
+            title: '1000% APR (TODO)',
             description: 'Get 1000% APR by staking here',
             button: (
               <SendHelloButton onClick={approveTokens} message="Stake Tokens" />
@@ -530,7 +539,7 @@ const Index = () => {
 
         <Card
           content={{
-            title: 'Claim Sewer Pass',
+            title: 'Claim Sewer Pass (TODO)',
             description:
               'You are eligible for Sewer Pass, we will pay for your gas',
             button: (

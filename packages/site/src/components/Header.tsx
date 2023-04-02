@@ -62,7 +62,7 @@ export const Header = ({
   return (
     <HeaderWrapper>
       <LogoWrapper>
-        <SnapLogo color={theme.colors.icon.default} size={36} />
+        <img src="icons/logo.png" width="45" />
         <Title>rugproof-snap</Title>
       </LogoWrapper>
       <RightContainer>

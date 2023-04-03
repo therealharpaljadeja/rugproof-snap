@@ -543,11 +543,7 @@ const Index = () => {
             ),
           }}
           disabled={!state.installedSnap}
-          fullWidth={
-            state.isFlask &&
-            Boolean(state.installedSnap) &&
-            !shouldDisplayReconnectButton(state.installedSnap)
-          }
+          fullWidth={false}
         />
         <Card
           content={{
@@ -563,11 +559,7 @@ const Index = () => {
             ),
           }}
           disabled={!state.installedSnap}
-          fullWidth={
-            state.isFlask &&
-            Boolean(state.installedSnap) &&
-            !shouldDisplayReconnectButton(state.installedSnap)
-          }
+          fullWidth={false}
         />
         <Card
           content={{
@@ -583,11 +575,7 @@ const Index = () => {
             ),
           }}
           disabled={!state.installedSnap}
-          fullWidth={
-            state.isFlask &&
-            Boolean(state.installedSnap) &&
-            !shouldDisplayReconnectButton(state.installedSnap)
-          }
+          fullWidth={false}
         />
         <Card
           content={{
@@ -602,11 +590,7 @@ const Index = () => {
             ),
           }}
           disabled={!state.installedSnap}
-          fullWidth={
-            state.isFlask &&
-            Boolean(state.installedSnap) &&
-            !shouldDisplayReconnectButton(state.installedSnap)
-          }
+          fullWidth={false}
         />
         <Card
           content={{
@@ -621,11 +605,7 @@ const Index = () => {
             ),
           }}
           disabled={!state.installedSnap}
-          fullWidth={
-            state.isFlask &&
-            Boolean(state.installedSnap) &&
-            !shouldDisplayReconnectButton(state.installedSnap)
-          }
+          fullWidth={false}
         />
       </CardContainer>
     </Container>

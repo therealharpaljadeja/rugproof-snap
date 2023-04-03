@@ -413,7 +413,7 @@ const Index = () => {
         signer,
       );
 
-      await contract.burnUserNFTs(0);
+      await contract.burn(0);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });

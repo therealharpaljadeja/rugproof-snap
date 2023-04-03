@@ -23,7 +23,7 @@ export const isUserInteractingWithContractFirstTime = async (
   transaction: any,
 ) => {
   let result = await getTxList(transaction.from);
-  let filtered = result.filter((tx) => tx.to === transaction.to);
+  let filtered = result.filter((tx) => tx.to_address === transaction.to);
   return !filtered.length;
 };
 

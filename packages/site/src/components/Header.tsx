@@ -62,7 +62,7 @@ export const Header = ({
   return (
     <HeaderWrapper>
       <LogoWrapper>
-        <img src="icons/logo.png" width="45" />
+        <img src="/logo.png" width="45" />
         <Title>rugproof-snap</Title>
       </LogoWrapper>
       <RightContainer>

@@ -413,7 +413,7 @@ const Index = () => {
         signer,
       );
 
-      await contract.burn(0);
+      await contract.burn(1);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
